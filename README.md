@@ -1,0 +1,3 @@
+# desktop-ai-core
+
+Shared provider abstractions and frontend scaffolding for desktop AI applications. This package supplies the common primitives consumed by [Bard](https://github.com/perrette/bard) (TTS) and [Scribe](https://github.com/perrette/scribe) (STT): a `TTSBackend` / `STTBackend` / `Voice` / `LanguageModel` type hierarchy, a provider registry, a generic `AbstractFrontendApp` lifecycle class, a terminal menu mini-framework, tray-icon helpers, and a cross-platform desktop-file installer — so that each app can focus on its domain-specific logic rather than re-implementing the shared shell.

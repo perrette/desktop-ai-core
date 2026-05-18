@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "desktop-ai-core"
+dynamic = ["version"]
+description = "Shared provider abstractions and frontend scaffolding for desktop AI apps (Bard, Scribe, etc.)"
+authors = [
+    { name="Mahé Perrette", email="mahe.perrette@gmail.com" }
+]
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.9"
+dependencies = []
+
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/perrette/desktop-ai-core"
+
+[tool.setuptools]
+packages = ["desktop_ai_core", "desktop_ai_core.providers", "desktop_ai_core.frontends"]
+
+[tool.setuptools_scm]
+write_to = "desktop_ai_core/_version.py"
+fallback_version = "0.1.0.dev0"
