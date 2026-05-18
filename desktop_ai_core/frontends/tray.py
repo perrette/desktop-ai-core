@@ -1,4 +1,8 @@
 import time as _time
+import os as _os
+import signal as _signal
+import logging as _logging
+from pathlib import Path
 
 
 _FLAGS = {
@@ -17,6 +21,38 @@ def flag_for(language: str | None) -> str:
     if language is None:
         return ""
     return _FLAGS.get(language, "")
+
+
+def write_pidfile(name: str) -> Path:
+    """Write a PID file for the named application. Returns the file path."""
+    runtime_dir = _os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
+    pid_path = Path(runtime_dir) / f"{name}.pid"
+    with open(pid_path, "w") as f:
+        f.write(str(_os.getpid()))
+    pid_path.chmod(0o600)
+    return pid_path
+
+
+def remove_pidfile(name: str) -> None:
+    """Remove the PID file for the named application. Silently ignores missing files."""
+    runtime_dir = _os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
+    pid_path = Path(runtime_dir) / f"{name}.pid"
+    try:
+        pid_path.unlink()
+    except FileNotFoundError:
+        pass
+
+
+def register_signal_toggle(signal_number: int, callback) -> None:
+    """Register *callback* as the handler for *signal_number*.
+
+    On platforms where the signal is unavailable the call is a no-op logged at
+    DEBUG level instead of raising.
+    """
+    try:
+        _signal.signal(signal_number, lambda *_: callback())
+    except (OSError, ValueError) as exc:
+        _logging.debug("register_signal_toggle: signal %d not available: %s", signal_number, exc)
 
 
 _UNSET = object()
