@@ -55,3 +55,14 @@ class TTSBackend(Backend):
 
     def synthesize_stream(self, text: str) -> Iterator[bytes]:
         raise NotImplementedError
+
+
+class STTBackend(Backend):
+    name: str
+    default_model: str | None = None
+    is_local: ClassVar[bool] = False
+    install_hint: ClassVar[str | None] = None
+
+    @abstractmethod
+    def transcribe(self, audio_path: Path) -> str:
+        ...
