@@ -60,9 +60,36 @@ class TTSBackend(Backend):
 class STTBackend(Backend):
     name: str
     default_model: str | None = None
+    supports_streaming: ClassVar[bool] = False
     is_local: ClassVar[bool] = False
     install_hint: ClassVar[str | None] = None
 
     @abstractmethod
     def transcribe(self, audio_path: Path) -> str:
         ...
+
+
+class StreamingSTTBackend(STTBackend):
+    supports_streaming: ClassVar[bool] = True
+
+    @abstractmethod
+    def feed_audio(self, chunk: bytes) -> Iterator[dict]:
+        ...
+
+    @abstractmethod
+    def finalize(self) -> dict:
+        ...
+
+    def open_session(self, session) -> None:
+        return None
+
+    def close_session(self) -> None:
+        return None
+
+    def transcribe_realtime_audio(self, chunk: bytes) -> dict:
+        last: dict | None = None
+        for event in self.feed_audio(chunk):
+            last = event
+        if last is None:
+            return {"partial": ""}
+        return last

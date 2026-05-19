@@ -2,6 +2,7 @@ from desktop_ai_core.providers.base import (
     Backend,
     LanguageModel,
     STTBackend,
+    StreamingSTTBackend,
     TTSBackend,
     Voice,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "Backend",
     "LanguageModel",
     "STTBackend",
+    "StreamingSTTBackend",
     "TTSBackend",
     "Voice",
     "available_stt",
