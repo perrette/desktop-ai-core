@@ -26,17 +26,20 @@ as a git dependency.
 
 ## Installation
 
-The package is not published to PyPI. Add it as a git dependency from a
-consumer project's `pyproject.toml`:
+```bash
+pip install desktop-ai-core
+```
+
+Or pin from a consumer project's `pyproject.toml`:
 
 ```toml
 [project]
 dependencies = [
-    "desktop-ai-core @ git+https://github.com/perrette/desktop-ai-core.git",
+    "desktop-ai-core>=0.1",
 ]
 ```
 
-Or pin to a specific revision:
+If you need an unreleased commit, you can also pull it straight from git:
 
 ```toml
 "desktop-ai-core @ git+https://github.com/perrette/desktop-ai-core.git@<sha>",
@@ -195,9 +198,8 @@ out of scope for now.
 - **Bard** — desktop text-to-speech. Registers TTS backends against
   `register_tts`; same frontend scaffolding.
 
-Both projects pin `desktop-ai-core` as a git dependency and treat its
-public surface (everything re-exported from
-`desktop_ai_core.providers.__init__` and
+Both projects depend on `desktop-ai-core` and treat its public surface
+(everything re-exported from `desktop_ai_core.providers.__init__` and
 `desktop_ai_core.frontends.__init__`) as the stable contract.
 
 ## Design notes
