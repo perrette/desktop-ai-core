@@ -5,25 +5,62 @@ import logging as _logging
 from pathlib import Path
 
 
-_FLAGS = {
-    "en-US": "🇺🇸",
-    "en-GB": "🇬🇧",
-    "fr-FR": "🇫🇷",
-    "de-DE": "🇩🇪",
-    "es-ES": "🇪🇸",
-    "it-IT": "🇮🇹",
-    "ja-JP": "🇯🇵",
-    "zh-CN": "🇨🇳",
-    "hi-IN": "🇮🇳",
-    "pt-BR": "🇧🇷",
-    "pt-PT": "🇵🇹",
+_COUNTRY_FLAGS = {
+    "US": "🇺🇸",
+    "GB": "🇬🇧",
+    "FR": "🇫🇷",
+    "DE": "🇩🇪",
+    "ES": "🇪🇸",
+    "IT": "🇮🇹",
+    "JP": "🇯🇵",
+    "CN": "🇨🇳",
+    "IN": "🇮🇳",
+    "BR": "🇧🇷",
+    "PT": "🇵🇹",
+}
+
+# Short ISO 639-1 → country of origin. The European convention (politically
+# neutral, language-as-cultural-artefact) maps each language to where it
+# was born rather than where it has the most speakers today: English →
+# Britain, Spanish → Spain, Portuguese → Portugal. Callers that want a
+# specific regional variant (en-US, pt-BR) should pass the long BCP-47
+# tag — `default_country` extracts the region from it directly.
+_LANG_DEFAULT_COUNTRY = {
+    "en": "GB",
+    "fr": "FR",
+    "de": "DE",
+    "es": "ES",
+    "it": "IT",
+    "ja": "JP",
+    "zh": "CN",
+    "hi": "IN",
+    "pt": "PT",
 }
 
 
-def flag_for(language: str | None) -> str:
+def default_country(language: str | None) -> str | None:
+    """Return the ISO 3166-1 alpha-2 country code to use as the default
+    flag for a language tag.
+
+    Long BCP-47 tags ('en-US', 'pt-BR') extract their explicit region.
+    Short ISO 639-1 codes ('en', 'fr') resolve to the language's country
+    of origin ('en' → 'GB', 'es' → 'ES', 'pt' → 'PT'). Returns None
+    when the language is unknown so callers can choose their fallback.
+    """
     if language is None:
+        return None
+    if "-" in language:
+        return language.split("-", 1)[1]
+    return _LANG_DEFAULT_COUNTRY.get(language)
+
+
+def flag_for(language: str | None) -> str:
+    """Return the flag emoji for a language tag, or empty string when
+    no mapping is known. See `default_country` for the lookup rules."""
+    country = default_country(language)
+    if country is None:
         return ""
-    return _FLAGS.get(language, "")
+    return _COUNTRY_FLAGS.get(country, "")
 
 
 def write_pidfile(name: str) -> Path:
