@@ -56,9 +56,14 @@ def default_country(language: str | None) -> str | None:
 
 def flag_for(language: str | None) -> str:
     """Return the flag emoji for a language tag, or empty string when
-    no mapping is known. See `default_country` for the lookup rules."""
+    no mapping is known. See `default_country` for the lookup rules.
+
+    Treats None and "" from `default_country` identically (both mean
+    'no country mapping'), so callers can disable flags entirely by
+    clearing `_LANG_DEFAULT_COUNTRY` — every lookup falls through to
+    "" without needing to also touch this function."""
     country = default_country(language)
-    if country is None:
+    if not country:
         return ""
     return _COUNTRY_FLAGS.get(country, "")
 
