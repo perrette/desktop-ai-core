@@ -1,5 +1,7 @@
 import time as _time
 import os as _os
+import tempfile as _tempfile
+import sys as _sys
 import signal as _signal
 import logging as _logging
 from pathlib import Path
@@ -68,20 +70,37 @@ def flag_for(language: str | None) -> str:
     return _COUNTRY_FLAGS.get(country, "")
 
 
+def _pidfile_path(name: str) -> Path:
+    """Return the PID file path for *name* in a portable runtime directory.
+
+    On Linux, honour ``XDG_RUNTIME_DIR`` (a per-user, tmpfs-backed dir) when
+    set, falling back to the system temp dir. On Windows and macOS there is no
+    ``XDG_RUNTIME_DIR`` and no ``/tmp``, so use ``tempfile.gettempdir()`` which
+    resolves to the correct per-user/system temp folder on every platform
+    (``/tmp`` on Linux, ``%TEMP%`` on Windows, ``$TMPDIR`` on macOS). This keeps
+    write/read/delete in sync via a single source of truth."""
+    runtime_dir = _os.environ.get("XDG_RUNTIME_DIR") or _tempfile.gettempdir()
+    return Path(runtime_dir) / f"{name}.pid"
+
+
 def write_pidfile(name: str) -> Path:
     """Write a PID file for the named application. Returns the file path."""
-    runtime_dir = _os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
-    pid_path = Path(runtime_dir) / f"{name}.pid"
+    pid_path = _pidfile_path(name)
     with open(pid_path, "w") as f:
         f.write(str(_os.getpid()))
-    pid_path.chmod(0o600)
+    # 0o600 is a POSIX permission concept; chmod is a no-op for the mode bits on
+    # Windows and can raise on some filesystems, so only apply it off-Windows.
+    if _sys.platform != "win32":
+        try:
+            pid_path.chmod(0o600)
+        except OSError:
+            pass
     return pid_path
 
 
 def remove_pidfile(name: str) -> None:
     """Remove the PID file for the named application. Silently ignores missing files."""
-    runtime_dir = _os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
-    pid_path = Path(runtime_dir) / f"{name}.pid"
+    pid_path = _pidfile_path(name)
     try:
         pid_path.unlink()
     except FileNotFoundError:
